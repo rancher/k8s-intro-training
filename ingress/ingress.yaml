@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: proxy
+  annotations:
+    http.port: "9000"
+spec:
+  backend:
+    serviceName: proxy
+    servicePort: 80
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx
+  annotations:
+    http.port: "9001"
+spec:
+  backend:
+    serviceName: nginx
+    servicePort: 80

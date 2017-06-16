@@ -1,0 +1,3 @@
+kubectl scale deployment/nginx --replicas=2
+kubectl edit deployment nginx
+kubectl run echo --image=gcr.io/google_containers/echoserver:1.4

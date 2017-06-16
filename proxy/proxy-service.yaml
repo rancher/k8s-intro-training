@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: proxy
+spec:
+  selector:
+    app: proxy
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

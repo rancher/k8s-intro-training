@@ -1,0 +1,1 @@
+kubectl create configmap proxy-cm --from-file=default.conf

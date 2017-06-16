@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-cm-pod
+spec:
+  containers:
+    - name: test-container
+      image: ubuntu
+      command: [ "sleep", "infinity" ]
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: test-cm

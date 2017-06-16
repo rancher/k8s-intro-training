@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: full
+spec:
+  containers:
+    - name: full
+      image: nginx
+      ports:
+        - containerPort: 80
+      env:
+        - name: EXAMPLE_ENV_VARIABLE
+          value: example_value
+      volumeMounts:
+        - mountPath: /container-dir
+          name: example-volume
+
+  volumes:
+  - name: example-volume
+    hostPath:
+      path: /host-dir
+
+  nodeSelector:
+    disktype: ssd
+
+  hostNetwork: true
