@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: proxy
   annotations:
-    http.port: "9000"
+    http.port: "8000"
 spec:
   backend:
     serviceName: proxy
@@ -16,7 +16,7 @@ kind: Ingress
 metadata:
   name: nginx
   annotations:
-    http.port: "9001"
+    http.port: "8001"
 spec:
   backend:
     serviceName: nginx
