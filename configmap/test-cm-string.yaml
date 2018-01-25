@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  httpd.conf: |
+    # value1
+  ssl.conf: |
+    # value2
+kind: ConfigMap
+metadata:
+  name: test-cm
