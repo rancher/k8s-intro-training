@@ -1,123 +1,162 @@
-# Setup / Deploy
+# Training Guide
 
-## Before webinar
-- 2 hosts - one server and one node
-- install server before webinar starts
-- connect to server, set auth
-- pull images down to host/server
-  - look at current running env to get latest image names/tags
+## Deploy K3s
 
-## During webinar
-- add host via `docker run`
-- install k8s
-- copy kubectl locally
+```bash
+k3sup install --ip=10.68.0.143 --user=root --k3s-version=v1.18.3+k3s1
+```
 
-# Pods
+## Kubernetes
 
-- explain pods (slide)
+### Pod
 
-## Shell Pod
-- show pod YAML (shell)
-- demonstrate `kubectl apply -f`
-- demonstrate `kubectl get|describe`
-- demonstrate `kubectl exec|logs`
+``` bash
+kubectl apply -f pod.yaml
+kubectl logs myapp-pod
+kubectl get po -w
+kubectl delete po myapp-pod
+```
 
-## nginx pod
-- run it
-- describe it
-- curl it from shell pod
-- demonstrate `kubectl delete`
-- talk about how pods don't restart automatically
+### Deployment
 
-# Deployments
+- we can launch random stuff, but this isn't repeatable
 
-- explain deployments (slide)
+``` bash
+kubectl create deploy nginx --image=nginx:1.16-alpine
+kubectl get deploy
+kubectl get po
+kubectl delete deploy/nginx
+```
 
-## nginx deployment
-- make sure no nginx pods are running
-- show deployment yaml
-- run it
-- show pods
-- demonstrate `kubectl edit`
-  - change image from 1.13 to 1.12
-  - show rolling update
-  - demonstrate `kubectl rollout status deploy/nginx`
-  - demonstrate `kubectl rollout undo`
-  - talk about how deployments make it easy to manage the underlying components
-  - show making deployment from `kubectl run`
+- launch again using kustomize templates
 
-  # Replication Controllers and Replica Sets
+```
+kubectl create deploy nginx --image=nginx:1.16-alpine --dry-run -o yaml > deployment/base/deployment.yaml
+kubectl apply -k deployment/base
+kubectl get deploy
+kubectl get po
+```
 
-  - explain how RCs used to define RS and then Pods
-  - explain that deployment covers it all now, with deployment creating RS to manage pods
+- describe pod, look at the image
+- scale deployment manually
 
-  # Services
+``` bash
+kubectl scale deploy/nginx --replicas=3
+kubectl rollout status deploy/nginx
+kubectl get deploy
+kubectl get po
+```
 
-  - so you have a pod or group of pods...now what?
-  - show service yaml
-  - run it
-  - explain service gives stable endpoint to pods and acts like load balancer
-  - show DNS endpoint from shell pod and curl it
-    - nginx.default.svc.cluster.local
-    - delete service
-    - create service via 'kubectl expose' with NodePort
-    - connect to it
-    - edit it and change type to LoadBalancer
+- upgrade with bad image
 
-    # Config Maps
+``` bash
+kubectl set image deploy/nginx nginx=nginx:1.17-alpne --record
+kubectl rollout status deploy/nginx
+kubectl get po
+kubectl rollout undo deploy/nginx
+```
 
-    - show slide
-    - explain that they remove the need for data containers that hold config files
-    - can be environment variables, volumes, or files
-    - show test-cm with key/value
-    - create it
-    - demonstrate `kubectl get configmap/test-cm`
-    - show cm-as-env
-    - create it
-    - shell into it and echo $PRIMARY_KEY and $SECONDARY_KEY
-    - show cm-as-volume
-    - create it
-    - shell into it and look at contents of /etc/config
-    - what about a practical example?
-    - show string-cm
-    - create it
-    - show cm-as-file and explain the mountPath and subPath
-    - create it
-    - shell into it and look at kibana.yml in /usr/share/kibana/config/kibana.yml
-    - what happens when we need to change it?
-    - edit test-cm and add key3/value3
-    - shell into volume-cm-pod and show that key3 appears in /etc/config
-    - edit kibana-config-v1
-    - show that it does _not_ update the file
-    - wait.
-    - treat configmaps as versioned entities
-    - edit kibana-config-v1 and change to v2
-    - create it
-    - edit kibana deploy and change v1 to v2
-    - shell into it and see that the config has updated
-    - how can we combine these?
-    - show test-cm-string.yaml
-    - apply it
-    - shell into volume-cm-pod
-    - ls /etc/config
-    - cat /etc/config/httpd.conf
-    - exit
-    - edit configmap/test-cm
-    - shell back into the pod
-    - note that it didn't change
-    - wait 
-    - note that it does change
-    - explain that this is an excellent way to update configurations for applications that automatically refresh their config on change, or applications that can process a signal to reload their config
+- redo upgrade from manifest
 
-    # Ingress
+``` bash
+kustomize build deployment/base
+```
 
-    - show slide
-    - explain that ingress acts as a router, routing by host or path or port
-    - multiple ingresses on multiple ports or single ingress with multiple routes
-    - show/explain ingress.yaml
-    - apply it
-    - show in GUI that it's creating ingress-lbs listening on designated ports
-    - connect to ports (one works, one doesn't)
-    - create new service named 'proxy'
+- edit base to change image and then apply
 
+```bash
+kubectl apply -k deployment/base
+```
 
+- how can we use this for different environments?
+
+```bash
+kustomize build deployment/overlay/staging
+kustomize build deployment/overlay/production
+
+kubectl apply -k deployment/overlay/staging
+kubectl apply -k deployment/overlay/production
+kubectl get deploy
+kubectl get pods
+```
+
+### ConfigMaps
+
+- show ConfigMaps
+- explain what they're for
+- explain how they're generated by Kustomize
+- they'll show up later
+
+### Services
+
+- show services listening as NodePort
+- go look at them
+
+``` bash
+curl -I training-a:<port>
+```
+
+### Ingress
+
+- show `deployment/overlay/ingress/single/ingress.yaml`
+
+``` bash
+kubectl apply -k deployment/overlay/ingress/single
+kubectl get ingress
+```
+
+- visit <https://training-a.cl.monach.us>
+- what about multiple apps?
+
+``` bash
+kustomize build deployment/overlay/ingress/fanout
+kubectl apply -k deployment/overlay/ingress/fanout 
+```
+
+- visit <https://training-a.cl.monach.us> (fail)
+- visit <https://training.cl.monach.us/nginx> (works)
+- deploy rancher-demo application
+
+```bash
+kustomize build rancher-demo/base
+kubectl apply -k rancher-demo/base
+```
+
+- visit <https://training-a.cl.monach.us/>
+
+## Rancher
+
+### Server Deploy
+
+```
+docker run -d --restart=unless-stopped -p 80:80 -p 443:443 -v /opt/rancher:/var/lib/rancher rancher/rancher:v2.3.4
+```
+
+### Node Deploy
+
+- Show how we would deploy an RKE cluster
+- Import the `training-a` k3s cluster
+
+### Rancher Server Walkthrough
+
+- Clusters
+- Authentication & Security
+- Storage
+- Projects
+- Namespaces
+- Catalogs
+- CLI/API/Kubectl
+
+### Application Deployment
+
+- show workloads on running cluster
+- edit them / delete them
+- redeploy `monachus/rancher-demo` as a workload
+    - expose port 8080
+- put an Ingress in front of it
+    - use `training-a.cl.monach.us`
+- scale it
+
+## Rancher Application Catalog
+
+- use the Hadoop example
