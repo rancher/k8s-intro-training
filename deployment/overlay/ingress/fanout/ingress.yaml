@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demo-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    traefik.ingress.kubernetes.io/rule-type: PathPrefixStrip
+spec:
+  rules:
+  - host: training-a.cl.monach.us
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rancher-demo-external
+          servicePort: 80
+      - path: /nginx
+        backend:
+          serviceName: nginx
+          servicePort: 80

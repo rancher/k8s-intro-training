@@ -1,0 +1,7 @@
+resources:
+- deployment.yaml
+- service.yaml
+configMapGenerator:
+- name: index
+  files:
+  - configs/index.html

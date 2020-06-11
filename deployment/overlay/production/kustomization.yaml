@@ -1,0 +1,13 @@
+namePrefix: prod-
+commonLabels:
+  environment: production
+bases:
+- ../../base
+patches:
+- image.yaml
+- replica_count.yaml
+configMapGenerator:
+- name: index
+  behavior: replace
+  files:
+  - configs/index.html

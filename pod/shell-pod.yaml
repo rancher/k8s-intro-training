@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Pod
-metadata:
-  name: shell
-spec:
-  containers:
-    - name: shell
-      image: joshwget/shell
-      command: [ "sleep", "infinity" ]

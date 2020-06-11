@@ -1,0 +1,9 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: rancher-demo-external
+spec:
+  type: ExternalName
+  externalName: rancher-demo.rancher-demo.svc.cluster.local
+  ports:
+  - port: 80
