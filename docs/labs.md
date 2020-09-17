@@ -59,7 +59,7 @@ Create a new instance and then create a K3d cluster on it by following the comma
 4. Install Rancher and wait for it to complete
     ```
     kubectl create namespace cattle-system
-    helm install rancher-stable/rancher --name rancher --namespace cattle-system --set hostname=$EXT_HOST
+    helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=$EXT_HOST
     ```
 5. On the working cluster, edit `/etc/hosts`.
 6. Enter the IP address of the Rancher cluster and the hostname you set for `EXT_HOST`. This will enable the working cluster to communicate directly with the Rancher cluster on its internal IP.
