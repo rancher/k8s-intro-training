@@ -3,7 +3,7 @@
 ## Deploy K3s
 
 ```bash
-k3sup install --ip=10.68.0.143 --user=root --k3s-version=v1.18.3+k3s1
+k3sup install --ip=10.68.0.143 --user=root --k3s-version=v1.18.8+k3s1
 ```
 
 ## Kubernetes
