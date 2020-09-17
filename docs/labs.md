@@ -31,7 +31,7 @@ Each instance will host its own 1-node K3d cluster.
 
 1. Create a new K3d cluster (replace `{name}` with the name of your cluster)
     ```
-    k3d cluster create {name} -p 80:80@loadbalancer -p 443:443@loadbalancer
+    k3d cluster create {name} -p 80:80@loadbalancer -p 443:443@loadbalancer --api-port=6443
     ```
 
 ## Launch the Working Cluster
