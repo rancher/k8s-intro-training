@@ -122,7 +122,7 @@ kustomize build rancher-demo/base
 kubectl apply -k rancher-demo/base
 ```
 
-- visit <https://training-a.cl.monach.us/>
+- visit <https://rancher-demo.cl.monach.us/>
 
 ## Rancher
 
