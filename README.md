@@ -2,8 +2,12 @@
 
 ## Deploy K3s
 
+For this you'll need a Linux system you can SSH into. We'll use the `k3sup` command available from [k3sup.dev](https://k3sup.dev). The defaults assume that you're using `~/.ssh/id_rsa` as your key and connecting as the `root` user. If you need to change these or other defaults, see the output from `k3sup install --help`.
+
+All `k3sup` needs to install K3s over SSH is the IP of the destination server. We're adding a release channel to make sure that we're running the `stable` release, and not the `latest`.
+
 ```bash
-k3sup install --ip=10.68.0.143 --user=root --k3s-version=v1.18.8+k3s1
+k3sup install --ip=10.68.0.143 --k3s-channel=stable
 ```
 
 ## Kubernetes
@@ -110,7 +114,7 @@ kubectl get ingress
 
 ``` bash
 kustomize build deployment/overlay/ingress/fanout
-kubectl apply -k deployment/overlay/ingress/fanout 
+kubectl apply -k deployment/overlay/ingress/fanout
 ```
 
 - visit <https://training-a.cl.monach.us> (fail)
