@@ -25,7 +25,7 @@ spec:
           subPath: index.html
         resources:
           limits:
-            cpu: "0.1"
+            cpu: 100m
             memory: 128Mi
       volumes:
       - name: index
