@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: demo-ingress
@@ -10,6 +10,9 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: nginx
-          servicePort: 80
+          service: 
+            name: dev-nginx
+            port: 
+              number: 80
