@@ -1,0 +1,4 @@
+bases:
+  - overlay/ingress/single
+  - overlay/staging
+  - overlay/production
