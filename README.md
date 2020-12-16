@@ -7,15 +7,17 @@ For this you'll need a Linux system you can SSH into. We'll use the `k3sup` comm
 All `k3sup` needs to install K3s over SSH is the IP of the destination server. We're adding a release channel to make sure that we're running the `stable` release, and not the `latest`.
 
 ```bash
-k3sup install --ip=10.68.0.143 --k3s-channel=stable
+# replace this with the IP of your host
+export IP=10.68.0.143
+k3sup install --ip=$IP --k3s-channel=stable
 ```
 
 ## Kubernetes
 
 ### Pod
 
-``` bash
-kubectl apply -f pod.yaml
+```bash
+kubectl apply -f pod/pod.yaml
 kubectl logs myapp-pod
 kubectl get po -w
 kubectl delete po myapp-pod
@@ -23,7 +25,7 @@ kubectl delete po myapp-pod
 
 ### Deployment
 
-- we can launch random stuff, but this isn't repeatable
+We can launch random stuff, but this isn't repeatable.
 
 ``` bash
 kubectl create deploy nginx --image=nginx:1.16-alpine
@@ -32,9 +34,10 @@ kubectl get po
 kubectl delete deploy/nginx
 ```
 
-- launch again using kustomize templates
+Launch again using kustomize templates.
 
-```
+
+```bash
 kubectl create deploy nginx --image=nginx:1.16-alpine --dry-run -o yaml > deployment/base/deployment.yaml
 kubectl apply -k deployment/base
 kubectl get deploy
@@ -97,7 +100,8 @@ kubectl get pods
 - go look at them
 
 ``` bash
-curl -I training-a:<port>
+export PORT=$(kubectl get service/staging-nginx -o jsonpath='{.spec.ports[0].nodePort}')
+curl -I $IP:$PORT
 ```
 
 ### Ingress
@@ -132,35 +136,21 @@ kubectl apply -k rancher-demo/base
 
 ### Server Deploy
 
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+helm repo update
+
+kubectl create namespace cert-manager
+kubectl create namespace cattle-system
+
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --set installCRDs=true
+
+helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=rancher.$IP.xip.io
 ```
-docker run -d --restart=unless-stopped -p 80:80 -p 443:443 -v /opt/rancher:/var/lib/rancher rancher/rancher:v2.4.5
-```
 
-### Node Deploy
+### Walkthrough
 
-- Show how we would deploy an RKE cluster
-- Import the `training-a` k3s cluster
-
-### Rancher Server Walkthrough
-
-- Clusters
-- Authentication & Security
-- Storage
-- Projects
-- Namespaces
-- Catalogs
-- CLI/API/Kubectl
-
-### Application Deployment
-
-- show workloads on running cluster
-- edit them / delete them
-- redeploy `monachus/rancher-demo` as a workload
-    - expose port 8080
-- put an Ingress in front of it
-    - use `training-a.cl.monach.us`
-- scale it
-
-## Rancher Application Catalog
-
-- use the Hadoop example
+- Cluster Explorer
+- Apps
+- Continuous Delivery
