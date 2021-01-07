@@ -74,6 +74,11 @@ You'll also want to start using aliases. See [this repository](https://github.co
 
 [Kubie](https://github.com/sbstp/kubie) is a utility for switching between Kubernetes clusters and contexts (namespaces) with isolation between terminal windows. It works great with Kui to keep it pointed at the right cluster.
 
+``` bash
+kubie ctx a  # will search KUBECONFIG for the a context
+kubie ctx -f config.a.yaml  # will use the contents of this config
+```
+
 ### Pods
 
 Smallest unit you can deploy in Kubernetes. The actual workload.
