@@ -173,7 +173,7 @@ We'll use this in a later section.
 Let's deploy something that will show us interesting traffic.
 
 ``` bash
-kubectl create deploy/demo --image monachus/rancher-demo --port 8080
+kubectl create deploy demo --image monachus/rancher-demo --port 8080
 kubectl edit deploy/demo
 ```
 
