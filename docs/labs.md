@@ -14,9 +14,6 @@ Each system that you launch needs some basic commands installed. When you launch
     # install curl and which
     yum install -y curl which
 
-    # install K3d
-    curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
-
     # install Kustomize
     curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
     mv kustomize /usr/local/bin
@@ -25,45 +22,81 @@ Each system that you launch needs some basic commands installed. When you launch
     curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | VERIFY_CHECKSUM=false bash
     ```
 
-### Launching a K3d Cluster
+## Install K3s
 
-Each instance will host its own 1-node K3d cluster.
+We'll start the class with Kubernetes commands pointed at the local cluster. For that we need to install [K3s][2].
 
-1. Create a new K3d cluster (replace `{name}` with the name of your cluster)
-    ```
-    k3d cluster create {name} -p 80:80@loadbalancer -p 443:443@loadbalancer --api-port=6443
-    ```
+```
+# install K3s (ignore the error that appears)
+curl -sfL https://get.k3s.io | INSTALL_K3S_SELINUX_WARN=true sh -s - --docker
 
-## Launch the Working Cluster
+# start K3s
+k3s server --docker > /var/log/k3s.log 2>&1 &
 
-Create a new instance and then create a K3d cluster on it by following the commands above.
+# export KUBECONFIG and test connection
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+kubectl get nodes
+```
 
-## Launch the Rancher Cluster
-
-Create a new instance and then create a K3d cluster on it by following the commands above. Continue with the Rancher installation steps:
+## Install Rancher
 
 1. Add Helm Repos
     ```
     helm repo add jetstack https://charts.jetstack.io
-    helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+    helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
     helm repo update
     ```
 2. Install cert-manager and wait for it to complete
     ```
     kubectl create namespace cert-manager
-    helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.0.1 --set installCRDs=true
+    helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.0.3 --set installCRDs=true
     kubectl rollout status deploy/cert-manager -n cert-manager
     kubectl get pods -n cert-manager
     ```
 3. Set the `EXT_HOST` variable to the external name of your host, visible in the `URL` field above the terminal
+    ```
+    # example - your hostname will be different
+    export EXT_HOST=ip172-18-0-10-bu460puj2b7000arid60.direct.labs.play-with-k8s.com
+    ```
 4. Install Rancher and wait for it to complete
     ```
     kubectl create namespace cattle-system
-    helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=$EXT_HOST
+    helm install rancher rancher-latest/rancher --namespace cattle-system --set hostname=$EXT_HOST
+    kubectl rollout status deploy/rancher -n cattle-system
+    kubectl get pods -n cattle-system
     ```
-5. On the working cluster, edit `/etc/hosts`.
-6. Enter the IP address of the Rancher cluster and the hostname you set for `EXT_HOST`. This will enable the working cluster to communicate directly with the Rancher cluster on its internal IP.
 7. Visit `$EXT_HOST` in a browser
 
 
 [1]: https://labs.play-with-k8s.com
+[2]: https://k3s.io
+
+
+<!--
+```
+yum install -y curl which
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+mv kustomize /usr/local/bin
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | VERIFY_CHECKSUM=false bash
+# install k3s
+curl -sfL https://get.k3s.io | INSTALL_K3S_SELINUX_WARN=true sh -s - --docker
+k3s server --docker > /var/log/k3s.log 2>&1 &
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+sleep 10
+kubectl get nodes
+# install cert-manager
+helm repo add jetstack https://charts.jetstack.io
+helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+helm repo update
+kubectl create namespace cert-manager
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.0.3 --set installCRDs=true
+kubectl rollout status deploy/cert-manager -n cert-manager
+kubectl get pods -n cert-manager
+# install rancher
+export EXT_HOST="ip172-18-0-13-bu4794mj2b7000arie3g.direct.labs.play-with-k8s.com"
+kubectl create namespace cattle-system
+helm install rancher rancher-latest/rancher --namespace cattle-system --set hostname=$EXT_HOST
+kubectl rollout status deploy/rancher -n cattle-system
+kubectl get pods -n cattle-system
+```
+-->
