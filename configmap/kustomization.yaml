@@ -1,6 +1,0 @@
-resources:
-- deployment.yaml
-configMapGenerator:
-- name: config
-  files:
-  - configs/redis-config

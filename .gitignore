@@ -1,4 +1,4 @@
 kubeconfig.*
 kubeconfig
 config.*.yaml
-k3s
+k3s*

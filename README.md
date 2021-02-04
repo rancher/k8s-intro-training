@@ -34,7 +34,7 @@ k3sup install --ip=$IP --k3s-channel=stable
 Alternatively, to install a specific version:
 
 ``` bash
-export VERSION=v1.20.0+k3s2
+export VERSION=v1.19.4+k3s1
 k3sup install --ip=$IP --k3s-version=$VERSION
 ```
 
@@ -77,6 +77,14 @@ You'll also want to start using aliases. See [this repository](https://github.co
 ``` bash
 kubie ctx a  # will search KUBECONFIG for the a context
 kubie ctx -f config.a.yaml  # will use the contents of this config
+kubie ns training # will switch to the "training" namespace
+```
+
+I have these aliased:
+
+```
+alias kcc="kubie ctx"
+alias ns="kubie ns"
 ```
 
 ### Pods
@@ -84,7 +92,7 @@ kubie ctx -f config.a.yaml  # will use the contents of this config
 Smallest unit you can deploy in Kubernetes. The actual workload.
 
 ```bash
-kubectl apply -f pod/pod.yaml
+kubectl apply -f 01-pod/pod.yaml
 kubectl logs myapp-pod
 kubectl get po -w
 kubectl delete po myapp-pod
@@ -150,7 +158,7 @@ cat /usr/share/html/index.html
 We can see that the HTML file is the default. We can override this directory with a ConfigMap
 
 ``` bash
-cd deployment/base
+cd 02-deployment/base
 cat configs/index.html
 cat deployment.yaml  # how is the ConfigMap created?
 ```
@@ -195,10 +203,10 @@ curl -I $IP:$PORT
 
 ### Ingress
 
-- show `deployment/overlay/ingress/demo/ingress.yaml`
+- show `02-deployment/overlay/ingress/demo/ingress.yaml`
 
 ``` bash
-cd deployment/overlay/ingress/demo
+cd 02-deployment/overlay/ingress/demo
 kubectl apply -f ingress.yaml
 kubectl get ingress
 curl -I -H 'Host: rancher-demo.cl.monach.us' http://$IP/
@@ -242,4 +250,4 @@ helm install rancher rancher-stable/rancher --namespace cattle-system --set host
 Remember Kustomize? We'll use it now.
 
 - Show the kustomization files and how they work together
-- Deploy with Fleet: `https://github.com/rancher/k8s-intro-training` with the `deployment` folder
+- Deploy with Fleet: `https://github.com/rancher/k8s-intro-training` with the `02-deployment` folder
