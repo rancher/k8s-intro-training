@@ -146,6 +146,42 @@ We can redo the upgrade from the manifest.
 kubectl edit deploy/nginx
 ```
 
+### Services
+
+Let's deploy something that will show us interesting traffic.
+
+``` bash
+kubectl create deploy demo --image monachus/rancher-demo --port 8080
+kubectl edit deploy/demo
+```
+
+``` yaml
+env:
+- name: COW_COLOR
+  value: YELLOW
+```
+
+``` bash
+kubectl expose deploy/demo --type=NodePort
+kubectl get service/demo -o yaml
+```
+
+``` bash
+export PORT=$(kubectl get service/demo -o jsonpath='{.spec.ports[0].nodePort}')
+curl -I $IP:$PORT
+```
+
+### Ingress
+
+- show `02-deployment/overlay/ingress/demo/ingress.yaml`
+
+``` bash
+cd 02-deployment/overlay/ingress/demo
+kubectl apply -f ingress.yaml
+kubectl get ingress
+curl -I -H 'Host: rancher-demo.cl.monach.us' http://$IP/
+```
+
 ### ConfigMaps
 
 ConfigMaps allow us to override data within the container.
@@ -176,45 +212,11 @@ Kustomize allows us to create and template content, reducing human error present
 
 We'll use this in a later section.
 
-### Services
-
-Let's deploy something that will show us interesting traffic.
-
-``` bash
-kubectl create deploy demo --image monachus/rancher-demo --port 8080
-kubectl edit deploy/demo
-```
-
-``` yaml
-env:
-- name: COW_COLOR
-  value: YELLOW
-```
-
-``` bash
-kubectl expose deploy/demo --type=NodePort
-kubectl get service/demo -o yaml
-```
-
-``` bash
-export PORT=$(kubectl get service/staging-nginx -o jsonpath='{.spec.ports[0].nodePort}')
-curl -I $IP:$PORT
-```
-
-### Ingress
-
-- show `02-deployment/overlay/ingress/demo/ingress.yaml`
-
-``` bash
-cd 02-deployment/overlay/ingress/demo
-kubectl apply -f ingress.yaml
-kubectl get ingress
-curl -I -H 'Host: rancher-demo.cl.monach.us' http://$IP/
-```
-
 ### Cleanup
 
 Delete it all.
+
+---
 
 ## Rancher
 
