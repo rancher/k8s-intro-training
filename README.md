@@ -158,7 +158,7 @@ kubectl edit deploy/demo
 ``` yaml
 env:
 - name: COW_COLOR
-  value: YELLOW
+  value: yellow
 ```
 
 ``` bash
