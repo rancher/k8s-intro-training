@@ -7,7 +7,7 @@ metadata:
     traefik.ingress.kubernetes.io/rule-type: PathPrefixStrip
 spec:
   rules:
-  - host: training-a.cl.monach.us
+  - host: demo-a.cl.monach.us
     http:
       paths:
       - path: /
