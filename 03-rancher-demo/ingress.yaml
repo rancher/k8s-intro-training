@@ -1,12 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: demo-ingress
+  name: demo
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+  labels:
+    app: demo
 spec:
   rules:
-  - host: rancher-demo.cl.monach.us
+  - host: rancher-demo.home.monach.us
     http:
       paths:
       - path: /
