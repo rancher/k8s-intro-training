@@ -27,7 +27,13 @@ All `k3sup` needs to install K3s over SSH is the IP of the destination server. W
 
 ```bash
 # replace this with the IP of your host
+
+# Bash
 export IP=10.68.0.143
+
+# Fish
+set -x IP 10.68.0.143
+
 k3sup install --ip=$IP --k3s-channel=stable
 ```
 
@@ -109,7 +115,7 @@ kubectl get po -w
 Creates a ReplicaSet that in turn creates and manages one or more Pods
 
 ``` bash
-kubectl create deploy nginx --image=nginx:1.16-alpine
+kubectl create deploy nginx --image=nginx:1.19-alpine
 kubectl get deploy
 kubectl get replicaset
 kubectl get po
@@ -134,7 +140,7 @@ kubectl get po
 What happens if we upgrade with a bad image?
 
 ``` bash
-kubectl set image deploy/nginx nginx=nginx:1.17-alpne
+kubectl set image deploy/nginx nginx=nginx:1.20-alpne
 kubectl rollout status deploy/nginx
 kubectl get po
 kubectl rollout undo deploy/nginx
@@ -144,42 +150,6 @@ We can redo the upgrade from the manifest.
 
 ``` bash
 kubectl edit deploy/nginx
-```
-
-### Services
-
-Let's deploy something that will show us interesting traffic.
-
-``` bash
-kubectl create deploy demo --image monachus/rancher-demo --port 8080
-kubectl edit deploy/demo
-```
-
-``` yaml
-env:
-- name: COW_COLOR
-  value: yellow
-```
-
-``` bash
-kubectl expose deploy/demo --type=NodePort
-kubectl get service/demo -o yaml
-```
-
-``` bash
-export PORT=$(kubectl get service/demo -o jsonpath='{.spec.ports[0].nodePort}')
-curl -I $IP:$PORT
-```
-
-### Ingress
-
-- show `02-deployment/overlay/ingress/demo/ingress.yaml`
-
-``` bash
-cd 02-deployment/overlay/ingress/demo
-kubectl apply -f ingress.yaml
-kubectl get ingress
-curl -I -H 'Host: rancher-demo.cl.monach.us' http://$IP/
 ```
 
 ### ConfigMaps
@@ -212,6 +182,54 @@ Kustomize allows us to create and template content, reducing human error present
 
 We'll use this in a later section.
 
+### Services
+
+Let's deploy something that will show us interesting traffic.
+
+``` bash
+cd 03-rancher-demo
+cat kustomization.yaml
+kubectl apply -k .
+
+# Bash
+export PORT=$(kubectl get service/demo -o jsonpath='{.spec.ports[0].nodePort}')
+
+# Fish
+set -x PORT (kubectl get service/demo -o jsonpath='{.spec.ports[0].nodePort}')
+
+# Use $IP from the top of this README
+curl -I $IP:$PORT
+
+# Open $IP:$PORT in a browser
+```
+
+We can demonstrate the benefits of Kustomize and a ConfigMap by editing `kustomization.yaml` and changing the value of `COW_COLOR`.
+
+```bash
+vi kustomization.yaml
+# change COW_COLOR to pink and save
+
+kubectl apply -k .
+kubectl get po -w
+```
+
+If we look at the Deployment YAML now, we'll see that the `configMapRef` was updated to use the new ConfigMap that Kustomize created. This gives us a clear path for rolling back if we want. If we had updated in place, the Deployment wouldn't have changed, and we wouldn't be able to roll back the change to the configuration.
+
+```bash
+kubectl rollout undo deploy demo
+```
+
+The cows are yellow again.
+
+### Ingress
+
+``` bash
+# still in 03-rancher-demo
+kubectl apply -f ingress.yaml
+kubectl get ingress
+curl -I -H 'Host: rancher-demo.home.monach.us' http://$IP/
+```
+
 ### Cleanup
 
 Delete it all.
@@ -232,10 +250,10 @@ helm install cert-manager jetstack/cert-manager --namespace cert-manager --set i
 kubectl get po -n cert-manager -w
 
 # Bash
-export HOSTNAME=rancher-training.cl.monach.us
+export HOSTNAME=rancher-training.home.monach.us
 
 # Fish
-set -x $HOSTNAME rancher-training.cl.monach.us
+set -x $HOSTNAME rancher-training.home.monach.us
 
 helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=$HOSTNAME --create-namespace
 ```

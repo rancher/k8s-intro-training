@@ -1,4 +1,0 @@
-bases:
-- ../single
-patchesStrategicMerge:
-- ingress.yaml
