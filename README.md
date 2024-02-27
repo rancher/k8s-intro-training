@@ -5,7 +5,7 @@
 Rancher gives you several options for running Kubernetes. You can use these or any other CNCF-certified Kubernetes distribution.
 
 - [K3s](https://k3s.io) - Lightweight Kubernetes that works both in the datacenter and resource-constrained environments like IoT and the Edge.
-- [RKE](https://rancher.com/products/rke/) - A complete installation of Kuberntets that runs inside of Docker containers.
+- [RKE](https://rancher.com/products/rke/) - A complete installation of Kubernetes that runs inside of Docker containers.
 - [RKE2](https://docs.rke2.io/) - The next generation of RKE, using ContainerD and FIPS compliant.
 - [K3d](https://k3d.io) - Runs a multi-node Kubernetes cluster within Docker. Designed for local development operations.
 
